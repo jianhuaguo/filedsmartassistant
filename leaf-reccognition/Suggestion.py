@@ -12,20 +12,17 @@ def simulate_model_output(image_path=None):
     :return: 模型预测的病害名称（如 "Apple_Scab general"）
     """
     # 如果没传图片路径，使用默认测试图片（请替换为你的实际测试图片路径）
-    if image_path is None:
-        image_path = rf"data\train\52\fe3c6ff0cfcb699dcadf6e6cc1d2d057.jpg"
-     # 检查图片是否存在
-    if not os.path.isfile(image_path):
+    if image_path is None or not os.path.isfile(image_path):
         return f"错误：图片路径不存在 - {image_path}"
     # 调用已有的predict()函数获取病害名称
     disease_name = predict(image_path)
     return disease_name
 
 
-def get_treatment_details():
+def get_treatment_details(image_path):
     """获取完整的病害分析和处理方案"""
     # 1. 获取模型预测的病害名称
-    disease_name = simulate_model_output(rf"data\train\58\0bf3eb4c-e2cd-4e72-8834-4fc045bd67ae___PSU_CG 2414.JPG")
+    disease_name = simulate_model_output(image_path)
     
     # 2. 如果模型返回错误（如路径不存在），直接返回错误信息
     if disease_name.startswith("错误："):
@@ -52,8 +49,14 @@ def get_treatment_details():
         }
 
 if __name__ == "__main__":
+
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--img", required=True, help="Path to test image")
+    args = parser.parse_args()
+
     # 执行查询并获取结果
-    result = get_treatment_details()
+    result = get_treatment_details(args.img)
     
     # 打印结果（按需要格式化输出）
     print(f"识别病害：{result['病害名称'] or '未知'}")

@@ -28,7 +28,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 model = get_net().to(device)
 
-ckpt_path = rf"checkpoints\best_model\resnet50\0\model_best.pth.tar"
+ckpt_path = "checkpoints/best_model/resnet50/0/model_best.pth.tar"
 checkpoint = torch.load(ckpt_path, map_location=device,weights_only=True)
 model.load_state_dict(checkpoint["state_dict"])
 model.eval()
