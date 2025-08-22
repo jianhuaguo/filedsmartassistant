@@ -1,0 +1,16 @@
+模型评估报告 - 2025-08-02 10:12:24
+==================================================
+
+【评估信息】
+模型路径: /workspace/testval-ai/runs/train/pest_detection_origin/weights/best.pt
+数据集配置: /workspace/testval-ai/dataset.yaml
+评估设备: 0
+评估结果保存路径: runs/detect/val2
+
+【核心评估指标】
+mAP@0.5: 0.5827
+mAP@0.5:0.95: 0.3717
+精确率: 0.5279
+召回率: 0.5676
+平均F1分数: 0.4930
+
