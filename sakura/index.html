@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>水果新鲜度检测</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #fff5f7;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-image: 
+        url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffccd5' fill-opacity='0.2'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .container {
+      background-color: white;
+      width: 100%;
+      max-width: 600px;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(255, 180, 200, 0.2);
+      text-align: center;
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    .container:hover {
+      transform: translateY(-5px);
+    }
+
+    /* 可爱的装饰元素 */
+    .decor {
+      position: absolute;
+      font-size: 24px;
+      opacity: 0.7;
+    }
+
+    .decor.cat1 {
+      top: 15px;
+      left: 15px;
+    }
+
+    .decor.dog1 {
+      top: 15px;
+      right: 15px;
+    }
+
+    .decor.cat2 {
+      bottom: 15px;
+      left: 20px;
+    }
+
+    .decor.dog2 {
+      bottom: 15px;
+      right: 20px;
+    }
+
+    h2 {
+      color: #e63973;
+      margin-bottom: 25px;
+      font-size: 1.8rem;
+      position: relative;
+      display: inline-block;
+      padding: 0 20px;
+    }
+
+    h2::before, h2::after {
+      content: '🐾';
+      margin: 0 10px;
+    }
+
+    .upload-area {
+      border: 2px dashed #ffccd5;
+      border-radius: 15px;
+      padding: 40px 20px;
+      margin-bottom: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .upload-area:hover {
+      border-color: #e63973;
+      background-color: #fff0f5;
+    }
+
+    #fileInput {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-icon {
+      font-size: 52px;
+      color: #e63973;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .upload-text {
+      color: #555;
+      font-size: 1rem;
+    }
+
+    #preview {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(255, 180, 200, 0.15);
+      margin: 20px 0;
+      display: none;
+      transition: all 0.3s ease;
+      border: 5px solid #fff0f5;
+    }
+
+    #preview.show {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 15px;
+      background-color: #fff0f5;
+      color: #e63973;
+      font-size: 1.2em;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      position: relative;
+    }
+
+    #result::before {
+      content: '🐾';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 16px;
+    }
+
+    #result.show {
+      opacity: 1;
+    }
+
+    #result strong {
+      font-size: 1.1em;
+      color: #c2185b;
+    }
+
+    .loading {
+      display: none;
+      margin: 20px 0;
+    }
+
+    .loading.show {
+      display: inline-block;
+    }
+
+    .loading span {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #e63973;
+      margin: 0 4px;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .loading span:nth-child(1) { animation-delay: -0.32s; }
+    .loading span:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+
+    footer {
+      margin-top: 30px;
+      color: #888;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 25px 15px;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .upload-area {
+        padding: 30px 15px;
+      }
+
+      .decor {
+        font-size: 20px;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <!-- 可爱的小猫小狗装饰元素 -->
+    <div class="decor cat1">🐱</div>
+    <div class="decor dog1">🐶</div>
+    <div class="decor cat2">😺</div>
+    <div class="decor dog2">🐾</div>
+
+    <h2>上传图片，实时检测水果及新鲜度</h2>
+
+    <div class="upload-area">
+      <input type="file" id="fileInput" accept="image/*">
+      <div class="upload-icon">
+        <i class="fas fa-upload"></i>
+        <span>🐾</span>
+      </div>
+      <div class="upload-text">
+        点击或拖拽图片到此处上传
+        <p style="font-size: 0.9rem; margin-top: 8px; color: #888;">支持 JPG、PNG 等常见图片格式</p>
+      </div>
+    </div>
+
+    <div class="loading">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <img id="preview" alt="图片预览">
+    <div id="result"></div>
+  </div>
+
+  <footer>
+    <span>🐱</span> 水果新鲜度智能检测系统 <span>🐶</span> &copy; 2023
+  </footer>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const resultDiv = document.getElementById('result');
+    const loading = document.querySelector('.loading');
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // 显示预览图
+      preview.src = URL.createObjectURL(file);
+      preview.classList.add('show');
+      
+      // 重置结果区域
+      resultDiv.classList.remove('show');
+      resultDiv.innerHTML = '';
+      
+      // 显示加载动画
+      loading.classList.add('show');
+
+      // 构造 FormData 上传
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('http://127.0.0.1:8000/predict', {
+          method: 'POST',
+          body: formData
+        });
+        
+        // 隐藏加载动画
+        loading.classList.remove('show');
+        
+        const data = await res.json();
+        resultDiv.innerHTML = `水果：<strong>${data.fruit}</strong><br>新鲜度：<strong>${data.freshness}</strong>`;
+        resultDiv.classList.add('show');
+      } catch (err) {
+        // 隐藏加载动画
+        loading.classList.remove('show');
+        
+        resultDiv.innerHTML = '请求失败，请确认后端已启动！';
+        resultDiv.classList.add('show');
+        console.error(err);
+      }
+    });
+
+    // 支持拖拽上传
+    const uploadArea = document.querySelector('.upload-area');
+    
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#e63973';
+      uploadArea.style.backgroundColor = '#fff0f5';
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = '#ffccd5';
+      uploadArea.style.backgroundColor = 'transparent';
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#ffccd5';
+      uploadArea.style.backgroundColor = 'transparent';
+      
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        const event = new Event('change');
+        fileInput.dispatchEvent(event);
+      }
+    });
+  </script>
+</body>
+</html>
