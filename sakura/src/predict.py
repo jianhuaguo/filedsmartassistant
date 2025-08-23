@@ -14,21 +14,35 @@ def isFresh(image_path):
     img = cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_BGR2RGB)
     tensor = val_tf(img).unsqueeze(0).to(device)
 
-    class_names =  "apples",
-    "banana",
+    class_names =   ["apples",
+    "banana", 
     "bittergroud",
     "capsicum",
-    "cucumber",
+    "cucumber", 
     "okra",
     "oranges",
     "potato",
-    "tomato"
+    "tomato"]
+
+    # 创建中英文映射字典
+    fruit_name_mapping = {
+    "apples": "苹果",
+    "banana": "香蕉",
+    "bittergroud": "苦瓜",
+    "capsicum": "辣椒",
+    "cucumber": "黄瓜",
+    "okra": "秋葵",
+    "oranges": "橙子",
+    "potato": "土豆",
+    "tomato": "番茄"
+}
     le = LabelEncoder()
     le.fit(class_names)
     with torch.no_grad():
         fruit_logits, fresh_logits = model(tensor)
         fruit = le.inverse_transform([fruit_logits.argmax().item()])[0]
-        fresh = 'Fresh' if fresh_logits.argmax().item()==0 else 'Spoiled'
+        fruit = fruit_name_mapping[fruit]
+        fresh = '新鲜' if fresh_logits.argmax().item()==0 else '已变质'
         return fruit, fresh
 
 if __name__ == "__main__":
@@ -43,4 +57,4 @@ if __name__ == "__main__":
     else:
         fruit, fresh = isFresh(args.img)
    
-        print(f"Predicted => Fruit: {fruit}, Freshness: {fresh}")
+        print(f"该水果是: {fruit}, 新鲜程度: {fresh}")

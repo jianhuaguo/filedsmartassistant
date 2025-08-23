@@ -13,7 +13,7 @@ RESULT_FOLDER = 'results'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 
-@app.route('/detect', methods=['POST'])
+@app.route('/insect', methods=['POST'])
 def detect():
     if 'image' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
